@@ -70,7 +70,7 @@ class FCN:
                 self.pool4 = slim.max_pool2d(self.conv4_3, [2,2], scope='pool4')
                 self.conv5_3 = slim.repeat(self.pool4, 3, slim.conv2d, 512, [3,3], scope='conv5')
                 self.pool5 = slim.max_pool2d(self.conv5_3, [2,2], scope='pool5')
-                self.fc6 = slim.conv2d(self.pool5, 4096, [7,7], padding='SAME', scope='fc6')
+                self.fc6 = slim.conv2d(self.pool5, 4096, [1,1], padding='SAME', scope='fc6')
                 self.fc6 = slim.dropout(self.fc6, 0.5, is_training=train, scope='dropout6')
                 self.fc7 = slim.conv2d(self.fc6, 4096, [1,1], padding='SAME', scope='fc7')
                 self.fc7 = slim.dropout(self.fc7, 0.5, is_training=train, scope='dropout7')
@@ -84,8 +84,15 @@ class FCN:
                     out_dims=num_classes,
                     debug=debug,
                     name='up', factor=32)
-
+            '''
+            self.upscore = self._upscore_layer(self.pool5, 
+                    output_shape=tf.shape(rgb),
+                    out_dims=num_classes,
+                    debug=debug,
+                    name='up', factor=32)
+            '''
         elif net_type == 'fcn_16s':
+            # TODO: implement fcn_16s
             self.upscore2 = self._upscore_layer(self.score_fr,
                     output_shape = tf.shape(self.pool4),
                     out_dims = num_classes,
@@ -101,7 +108,9 @@ class FCN:
                     factor = 16)
         elif net_type == 'fcn_8s':
             # TODO: implement fcn_8s
+            TODO = True
         else:
+            TODO = True
 
         self.pred_up = tf.argmax(self.upscore, axis=3)
 
