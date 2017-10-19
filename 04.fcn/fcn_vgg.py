@@ -39,7 +39,7 @@ class FCN:
         """
         
         # Convert RGB to BGR
-        '''
+        
         with tf.name_scope('Processing'):
 
             red, green, blue = tf.split(rgb, 3, 3)
@@ -56,11 +56,11 @@ class FCN:
                 bgr = tf.Print(bgr, [tf.shape(bgr)],
                                message='Shape of input image: ',
                                summarize=4, first_n=1)
-        '''
-        with tf.variable_scope('vgg_16', values=[rgb]) as sc:
+        
+        with tf.variable_scope('vgg_16', values=[bgr]) as sc:
             with slim.arg_scope([slim.conv2d, slim.fully_connected, slim.max_pool2d]):
 
-                self.conv1_2 = slim.repeat(rgb, 2, slim.conv2d, 64, [3,3], scope='conv1')
+                self.conv1_2 = slim.repeat(bgr, 2, slim.conv2d, 64, [3,3], scope='conv1')
                 self.pool1 = slim.max_pool2d(self.conv1_2, [2,2], scope='pool1')
                 self.conv2_2 = slim.repeat(self.pool1, 2, slim.conv2d, 128, [3,3], scope='conv2')
                 self.pool2 = slim.max_pool2d(self.conv2_2, [2,2], scope='pool2')
@@ -70,7 +70,7 @@ class FCN:
                 self.pool4 = slim.max_pool2d(self.conv4_3, [2,2], scope='pool4')
                 self.conv5_3 = slim.repeat(self.pool4, 3, slim.conv2d, 512, [3,3], scope='conv5')
                 self.pool5 = slim.max_pool2d(self.conv5_3, [2,2], scope='pool5')
-                self.fc6 = slim.conv2d(self.pool5, 4096, [1,1], padding='SAME', scope='fc6')
+                self.fc6 = slim.conv2d(self.pool5, 4096, [7,7], padding='SAME', scope='fc6')
                 self.fc6 = slim.dropout(self.fc6, 0.5, is_training=train, scope='dropout6')
                 self.fc7 = slim.conv2d(self.fc6, 4096, [1,1], padding='SAME', scope='fc7')
                 self.fc7 = slim.dropout(self.fc7, 0.5, is_training=train, scope='dropout7')
@@ -80,17 +80,10 @@ class FCN:
         self.pred = tf.argmax(self.score_fr, axis=3)
         if net_type == 'fcn_32s':
             self.upscore = self._upscore_layer(self.score_fr, 
-                    output_shape=tf.shape(rgb),
+                    output_shape=tf.shape(bgr),
                     out_dims=num_classes,
                     debug=debug,
                     name='up', factor=32)
-            '''
-            self.upscore = self._upscore_layer(self.pool5, 
-                    output_shape=tf.shape(rgb),
-                    out_dims=num_classes,
-                    debug=debug,
-                    name='up', factor=32)
-            '''
         elif net_type == 'fcn_16s':
             # TODO: implement fcn_16s
             self.upscore2 = self._upscore_layer(self.score_fr,
@@ -102,7 +95,7 @@ class FCN:
                     activation_fn=None, normalizer_fn=None, scope='score_pool4')
             self.fuse_pool4 = tf.add(self.upscore2, self.score_pool4)
             self.upscore = self._upscore_layer(self.fuse_pool4,
-                    output_shape = tf.shape(rgb),
+                    output_shape = tf.shape(bgr),
                     out_dims = num_classes,
                     debug = debug, name = 'upscore32',
                     factor = 16)
