@@ -42,8 +42,8 @@ class CIFAR10_loader():
         self.train_labels = np.zeros([NUM_TRAIN_EXAMPLES], dtype=int)
         begin = 0
         for i in range(5):
-            with open(os.path.join(CUR_PATH, 
-                'cifar-10-batches-py/data_batch_%d') % (i+1), 'r') as file:
+            #with open(os.path.join(CUR_PATH, 'cifar-10-batches-py/data_batch_%d') % (i+1), 'r') as file:
+            with open(os.path.abspath('../cifar10_data/cifar-10-batches-py/data_batch_%d') % (i+1), 'r') as file:
                 loaded_data = pickle.load(file)
             images = loaded_data['data'].astype(float).reshape([-1, 3, IMAGE_SIZE, IMAGE_SIZE])
             labels = loaded_data['labels']
@@ -52,8 +52,8 @@ class CIFAR10_loader():
             begin += len(labels)
         
         # load test data
-        with open(os.path.join(CUR_PATH, 
-            'cifar-10-batches-py/test_batch')) as file:
+        #with open(os.path.join(CUR_PATH, 'cifar-10-batches-py/test_batch')) as file:
+        with open(os.path.abspath('../cifar10_data/cifar-10-batches-py/test_batch')) as file:
             loaded_data = pickle.load(file)
         images = loaded_data['data'].astype(float).reshape([-1, 3, IMAGE_SIZE, IMAGE_SIZE])
         self.test_images = images.transpose([0,2,3,1])
